@@ -1,0 +1,2110 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Gestion de Tickets - BTS SIO SLAM</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Segoe UI', system-ui, -apple-system, sans-serif;
+            line-height: 1.6;
+            color: #333;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+        }
+
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 20px;
+            background: white;
+            box-shadow: 0 0 20px rgba(0,0,0,0.1);
+            border-radius: 10px;
+            margin-top: 80px;
+            margin-bottom: 40px;
+        }
+
+        .nav-fixed {
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            background: rgba(255, 255, 255, 0.95);
+            backdrop-filter: blur(10px);
+            border-bottom: 1px solid #eee;
+            z-index: 1000;
+            padding: 10px 0;
+        }
+
+        .nav-container {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 0 20px;
+        }
+
+        .nav-title {
+            font-weight: bold;
+            color: #667eea;
+            font-size: 1.1em;
+        }
+
+        .nav-links {
+            display: flex;
+            gap: 15px;
+            flex-wrap: wrap;
+        }
+
+        .nav-links a {
+            text-decoration: none;
+            color: #666;
+            padding: 8px 12px;
+            border-radius: 6px;
+            transition: all 0.3s ease;
+            font-size: 0.9em;
+        }
+
+        .nav-links a:hover,
+        .nav-links a.active {
+            background: #667eea;
+            color: white;
+        }
+
+        .hero-title {
+            font-size: 2.5em;
+            text-align: center;
+            margin: 40px 0 20px;
+            background: linear-gradient(135deg, #667eea, #764ba2);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+        }
+
+        .hero-subtitle {
+            text-align: center;
+            color: #666;
+            font-size: 1.2em;
+            margin-bottom: 40px;
+        }
+
+        .section {
+            margin: 50px 0;
+            padding: 30px 0;
+            border-bottom: 1px solid #eee;
+        }
+
+        .section h2 {
+            font-size: 2em;
+            margin-bottom: 30px;
+            color: #333;
+            border-left: 5px solid #667eea;
+            padding-left: 20px;
+        }
+
+        .section h3 {
+            font-size: 1.5em;
+            margin: 25px 0 15px;
+            color: #667eea;
+        }
+
+        .intro-dropdown, .quiz-container {
+            margin: 20px 0;
+            border: 1px solid #ddd;
+            border-radius: 8px;
+            overflow: hidden;
+        }
+
+        .intro-header, .quiz-header {
+            background: #f8f9fa;
+            padding: 15px 20px;
+            cursor: pointer;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            font-weight: bold;
+            color: #495057;
+        }
+
+        .quiz-header {
+            background: #667eea;
+            color: white;
+        }
+
+        .intro-header:hover {
+            background: #e9ecef;
+        }
+
+        .quiz-header:hover {
+            background: #5a6fd8;
+        }
+
+        .intro-arrow, .quiz-arrow {
+            transition: transform 0.3s ease;
+        }
+
+        .intro-arrow.open, .quiz-arrow.open {
+            transform: rotate(180deg);
+        }
+
+        .intro-content, .quiz-content {
+            max-height: 0;
+            overflow: hidden;
+            transition: max-height 0.3s ease;
+        }
+
+        .intro-content.open {
+            max-height: 1200px;
+        }
+
+        .quiz-content.open {
+            max-height: 2500px;
+        }
+
+        .intro-text {
+            padding: 20px;
+        }
+
+        .intro-highlight {
+            background: #fff3cd;
+            border: 1px solid #ffeaa7;
+            border-radius: 6px;
+            padding: 15px;
+            margin: 15px 0;
+            font-weight: bold;
+        }
+
+        .alert {
+            padding: 15px 20px;
+            border-radius: 8px;
+            margin: 20px 0;
+            display: flex;
+            gap: 15px;
+            align-items: flex-start;
+        }
+
+        .alert-icon {
+            font-size: 1.5em;
+            flex-shrink: 0;
+        }
+
+        .alert-info {
+            background: #e3f2fd;
+            border: 1px solid #90caf9;
+            color: #0d47a1;
+        }
+
+        .alert-success {
+            background: #e8f5e9;
+            border: 1px solid #81c784;
+            color: #1b5e20;
+        }
+
+        .alert-warning {
+            background: #fff3e0;
+            border: 1px solid #ffb74d;
+            color: #e65100;
+        }
+
+        .ticket-cards {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+            gap: 20px;
+            margin: 30px 0;
+        }
+
+        .ticket-card {
+            background: white;
+            border-radius: 12px;
+            padding: 25px;
+            border: 2px solid;
+            transition: transform 0.3s ease, box-shadow 0.3s ease;
+        }
+
+        .ticket-card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 8px 25px rgba(0,0,0,0.15);
+        }
+
+        .ticket-bug {
+            border-color: #ef4444;
+            background: linear-gradient(135deg, #fff5f5, #ffe8e8);
+        }
+
+        .ticket-feature {
+            border-color: #3b82f6;
+            background: linear-gradient(135deg, #eff6ff, #dbeafe);
+        }
+
+        .ticket-task {
+            border-color: #f59e0b;
+            background: linear-gradient(135deg, #fffbeb, #fef3c7);
+        }
+
+        .ticket-improvement {
+            border-color: #10b981;
+            background: linear-gradient(135deg, #f0fdf4, #dcfce7);
+        }
+
+        .ticket-icon {
+            font-size: 2.5em;
+            margin-bottom: 15px;
+            text-align: center;
+        }
+
+        .comparison-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 30px;
+            margin: 30px 0;
+        }
+
+        .comparison-card {
+            background: white;
+            border: 2px solid #e5e7eb;
+            border-radius: 12px;
+            padding: 25px;
+            box-shadow: 0 4px 6px rgba(0,0,0,0.1);
+        }
+
+        .comparison-card h4 {
+            color: #667eea;
+            font-size: 1.3em;
+            margin-bottom: 15px;
+            text-align: center;
+        }
+
+        .workflow-steps {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            margin: 30px 0;
+            flex-wrap: wrap;
+            gap: 15px;
+        }
+
+        .workflow-step {
+            flex: 1;
+            min-width: 150px;
+            background: linear-gradient(135deg, #667eea, #764ba2);
+            color: white;
+            padding: 20px;
+            border-radius: 12px;
+            text-align: center;
+            position: relative;
+        }
+
+        .workflow-step::after {
+            content: '→';
+            position: absolute;
+            right: -25px;
+            top: 50%;
+            transform: translateY(-50%);
+            font-size: 2em;
+            color: #667eea;
+        }
+
+        .workflow-step:last-child::after {
+            display: none;
+        }
+
+        .best-practices {
+            background: #f8f9fa;
+            border-radius: 12px;
+            padding: 25px;
+            margin: 20px 0;
+        }
+
+        .best-practices ul {
+            list-style: none;
+            padding-left: 0;
+        }
+
+        .best-practices li {
+            padding: 10px;
+            margin: 8px 0;
+            background: white;
+            border-left: 4px solid #667eea;
+            border-radius: 4px;
+        }
+
+        .best-practices li::before {
+            content: '✓';
+            color: #10b981;
+            font-weight: bold;
+            margin-right: 10px;
+        }
+
+        .quiz-question {
+            padding: 20px;
+            border-bottom: 1px solid #eee;
+        }
+
+        .quiz-question:last-of-type {
+            border-bottom: none;
+        }
+
+        .question-text {
+            font-size: 1.1em;
+            font-weight: 600;
+            margin-bottom: 15px;
+            color: #333;
+        }
+
+        .quiz-options {
+            display: flex;
+            flex-direction: column;
+            gap: 10px;
+        }
+
+        .quiz-option {
+            padding: 12px 16px;
+            border: 2px solid #e5e7eb;
+            border-radius: 8px;
+            background: white;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            text-align: left;
+        }
+
+        .quiz-option:hover {
+            border-color: #667eea;
+            background: #f0f4ff;
+            transform: translateX(5px);
+        }
+
+        .quiz-option.correct {
+            background: #10b981;
+            border-color: #059669;
+            color: white;
+            font-weight: 600;
+        }
+
+        .quiz-option.incorrect {
+            background: #ef4444;
+            border-color: #dc2626;
+            color: white;
+            font-weight: 600;
+        }
+
+        .quiz-feedback {
+            margin-top: 15px;
+            padding: 12px;
+            border-radius: 6px;
+            display: none;
+        }
+
+        .quiz-feedback.show {
+            display: block;
+        }
+
+        .feedback-correct {
+            background: #d1fae5;
+            border-left: 4px solid #10b981;
+            color: #065f46;
+        }
+
+        .feedback-incorrect {
+            background: #fee2e2;
+            border-left: 4px solid #ef4444;
+            color: #991b1b;
+        }
+
+        .quiz-score {
+            background: linear-gradient(135deg, #667eea, #764ba2);
+            color: white;
+            padding: 20px;
+            border-radius: 8px;
+            text-align: center;
+            margin-top: 20px;
+            display: none;
+        }
+
+        .quiz-score.show {
+            display: block;
+        }
+
+        .checklist {
+            background: white;
+            border: 2px solid #e5e7eb;
+            border-radius: 12px;
+            padding: 25px;
+            margin: 20px 0;
+        }
+
+        .checklist-item {
+            padding: 12px;
+            margin: 10px 0;
+            display: flex;
+            align-items: center;
+            gap: 15px;
+            border-bottom: 1px solid #f3f4f6;
+            cursor: pointer;
+            transition: background 0.3s ease;
+        }
+
+        .checklist-item:hover {
+            background: #f9fafb;
+        }
+
+        .checkbox {
+            width: 24px;
+            height: 24px;
+            border: 2px solid #667eea;
+            border-radius: 4px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            flex-shrink: 0;
+        }
+
+        .checkbox.checked {
+            background: #667eea;
+        }
+
+        .checkbox.checked::after {
+            content: '✓';
+            color: white;
+            font-weight: bold;
+        }
+
+        @media (max-width: 768px) {
+            .hero-title {
+                font-size: 1.8em;
+            }
+
+            .comparison-grid {
+                grid-template-columns: 1fr;
+            }
+
+            .workflow-step::after {
+                content: '↓';
+                right: 50%;
+                top: auto;
+                bottom: -30px;
+                transform: translateX(50%);
+            }
+
+            .nav-links {
+                font-size: 0.8em;
+                gap: 8px;
+            }
+        }
+    </style>
+</head>
+<body class="overflow-x-hidden">
+    <!-- Navigation fixe -->
+    <header>
+        <nav class="nav-fixed w-full">
+            <div class="nav-container max-w-7xl mx-auto flex flex-col md:flex-row items-center justify-between px-4 sm:px-6 lg:px-8 py-3 md:py-4 gap-3 md:gap-4">
+                <div class="nav-title text-center md:text-left text-sm sm:text-base">🎫 Gestion de Tickets - BTS SIO</div>
+                <div class="nav-links flex flex-wrap justify-center md:justify-end gap-2 md:gap-4 text-sm">
+                    <a href="#intro">Introduction</a>
+                    <a href="#types">Types</a>
+                    <a href="#trello">Trello</a>
+                    <a href="#notion">Notion</a>
+                    <a href="#glpi">GLPI</a>
+                    <a href="#scrum">Scrum</a>
+                    <a href="#bonnes-pratiques">Pratiques</a>
+                    <a href="#synthese">Synthèse</a>
+                </div>
+            </div>
+        </nav>
+    </header>
+
+    <main class="container max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-6 md:py-8 w-full">
+        <!-- Titre principal -->
+        <h1 class="hero-title text-3xl sm:text-4xl md:text-5xl lg:text-6xl">🎫 Gestion de Tickets</h1>
+        <p class="hero-subtitle text-lg sm:text-xl md:text-2xl">Organiser et suivre efficacement vos projets - BTS SIO SLAM</p>
+
+        <!-- Section Introduction -->
+        <div id="intro" class="section py-6 md:py-8">
+            <h2 class="text-2xl sm:text-3xl md:text-4xl">🎯 Introduction : Pourquoi gérer les tickets ?</h2>
+
+            <div class="intro-dropdown">
+                <div class="intro-header" onclick="toggleIntro(0)">
+                    💡 Comprendre l'importance de la gestion de tickets
+                    <span class="intro-arrow">▼</span>
+                </div>
+                <div id="intro0" class="intro-content">
+                    <div class="intro-text">
+                        <p><strong>🎯 Objectif :</strong> Comprendre comment les tickets permettent d'organiser, suivre et prioriser le travail dans un projet de développement.</p>
+
+                        <h4>📋 Qu'est-ce qu'un ticket ?</h4>
+                        <p>Un ticket est une <strong>unité de travail</strong> qui décrit quelque chose à faire dans un projet :</p>
+                        <ul>
+                            <li><strong>Bug à corriger</strong> : "Le bouton de connexion ne fonctionne pas"</li>
+                            <li><strong>Fonctionnalité à développer</strong> : "Ajouter un système de commentaires"</li>
+                            <li><strong>Tâche à réaliser</strong> : "Rédiger la documentation API"</li>
+                            <li><strong>Amélioration</strong> : "Optimiser le temps de chargement de la page d'accueil"</li>
+                        </ul>
+
+                        <h4>⚡ Pourquoi utiliser des tickets ?</h4>
+                        <ul>
+                            <li><strong>Organisation</strong> : Ne rien oublier, tout est tracé</li>
+                            <li><strong>Priorisation</strong> : Savoir ce qui est urgent vs important</li>
+                            <li><strong>Collaboration</strong> : Qui fait quoi ? Quel est l'avancement ?</li>
+                            <li><strong>Historique</strong> : Tracer les décisions et les changements</li>
+                            <li><strong>Communication</strong> : Centraliser les discussions sur un sujet précis</li>
+                        </ul>
+
+                        <div class="intro-highlight">
+                            <strong>🎯 Analogie :</strong> Les tickets sont comme des post-it organisés - chacun représente une tâche à faire, mais avec plus d'informations (qui, quand, pourquoi, comment).
+                        </div>
+
+                        <h4>💼 Dans le monde professionnel</h4>
+                        <p>En entreprise, <strong>100% des projets utilisent un système de tickets</strong> pour gérer leur travail. C'est un standard universel que vous devez maîtriser !</p>
+                    </div>
+                </div>
+            </div>
+
+            <div class="alert alert-info">
+                <div class="alert-icon">ℹ️</div>
+                <div>
+                    <strong>Lien avec Scrum :</strong> Vous connaissez déjà les concepts de sprint, backlog et user stories. Les tickets sont la façon concrète de représenter ces éléments dans un outil !
+                </div>
+            </div>
+        </div>
+
+        <!-- Section Types de tickets -->
+        <div id="types" class="section py-6 md:py-8">
+            <h2>📝 Les différents types de tickets</h2>
+
+            <div class="intro-dropdown">
+                <div class="intro-header" onclick="toggleIntro(1)">
+                    💡 Comprendre les catégories de tickets
+                    <span class="intro-arrow">▼</span>
+                </div>
+                <div id="intro1" class="intro-content">
+                    <div class="intro-text">
+                        <p><strong>🎯 Objectif :</strong> Savoir identifier et classer les différents types de travail dans un projet.</p>
+
+                        <p>Chaque ticket appartient à une catégorie qui définit sa nature. Voici les 4 types principaux que vous utiliserez le plus souvent :</p>
+
+                        <div class="intro-highlight">
+                            <strong>📌 Important :</strong> La catégorisation aide à prioriser et organiser le travail. Un bug critique sera traité avant une amélioration mineure.
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="ticket-cards">
+                <div class="ticket-card ticket-bug">
+                    <div class="ticket-icon">🐛</div>
+                    <h3 style="color: #ef4444; margin-bottom: 15px;">Bug</h3>
+                    <p><strong>Définition :</strong> Quelque chose ne fonctionne pas comme prévu</p>
+                    <br>
+                    <p><strong>Exemples :</strong></p>
+                    <ul style="margin-left: 20px;">
+                        <li>• Le bouton "Envoyer" ne répond pas</li>
+                        <li>• Erreur 500 sur la page profil</li>
+                        <li>• Les images ne s'affichent pas</li>
+                    </ul>
+                    <br>
+                    <p><strong>Priorité :</strong> Souvent haute ou critique</p>
+                </div>
+
+                <div class="ticket-card ticket-feature">
+                    <div class="ticket-icon">✨</div>
+                    <h3 style="color: #3b82f6; margin-bottom: 15px;">Feature (Fonctionnalité)</h3>
+                    <p><strong>Définition :</strong> Nouvelle fonctionnalité à développer</p>
+                    <br>
+                    <p><strong>Exemples :</strong></p>
+                    <ul style="margin-left: 20px;">
+                        <li>• Ajouter un système de filtres</li>
+                        <li>• Créer une page de statistiques</li>
+                        <li>• Implémenter l'authentification 2FA</li>
+                    </ul>
+                    <br>
+                    <p><strong>Priorité :</strong> Variable selon le besoin</p>
+                </div>
+
+                <div class="ticket-card ticket-task">
+                    <div class="ticket-icon">📋</div>
+                    <h3 style="color: #f59e0b; margin-bottom: 15px;">Tâche (Task)</h3>
+                    <p><strong>Définition :</strong> Travail à réaliser (non technique ou technique)</p>
+                    <br>
+                    <p><strong>Exemples :</strong></p>
+                    <ul style="margin-left: 20px;">
+                        <li>• Rédiger la documentation</li>
+                        <li>• Configurer l'environnement de test</li>
+                        <li>• Préparer la présentation client</li>
+                    </ul>
+                    <br>
+                    <p><strong>Priorité :</strong> Dépend du contexte</p>
+                </div>
+
+                <div class="ticket-card ticket-improvement">
+                    <div class="ticket-icon">🚀</div>
+                    <h3 style="color: #10b981; margin-bottom: 15px;">Amélioration (Enhancement)</h3>
+                    <p><strong>Définition :</strong> Optimisation d'une fonctionnalité existante</p>
+                    <br>
+                    <p><strong>Exemples :</strong></p>
+                    <ul style="margin-left: 20px;">
+                        <li>• Améliorer les performances de recherche</li>
+                        <li>• Rendre l'interface plus intuitive</li>
+                        <li>• Ajouter des raccourcis clavier</li>
+                    </ul>
+                    <br>
+                    <p><strong>Priorité :</strong> Souvent moyenne ou basse</p>
+                </div>
+            </div>
+
+            <h3>📊 Autres catégories que vous rencontrerez</h3>
+            <div class="best-practices">
+                <ul>
+                    <li><strong>Spike / Research</strong> : Investigation technique avant de décider comment implémenter quelque chose</li>
+                    <li><strong>Epic / User Story</strong> : Regroupement de plusieurs tickets liés (ex: "Système de paiement" contient 10 tickets)</li>
+                    <li><strong>Hotfix</strong> : Correction urgente à déployer immédiatement en production</li>
+                    <li><strong>Technical Debt</strong> : Refactoring pour améliorer la qualité du code</li>
+                </ul>
+            </div>
+
+            <div class="alert alert-warning">
+                <div class="alert-icon">⚠️</div>
+                <div>
+                    <strong>Attention :</strong> La catégorisation peut varier selon les équipes. L'important est d'être cohérent dans votre projet. Définissez vos catégories en début de projet et tenez-vous-y !
+                </div>
+            </div>
+        </div>
+
+        <!-- Quiz 1 -->
+        <div class="quiz-container">
+            <div class="quiz-header" onclick="toggleQuiz(1)">
+                <span>🎯 Quiz 1 : Introduction et Types de tickets</span>
+                <span class="quiz-arrow">▼</span>
+            </div>
+            <div id="quiz1" class="quiz-content">
+                <div class="quiz-question">
+                    <div class="question-text">1. Qu'est-ce qu'un ticket dans le contexte de gestion de projet ?</div>
+                    <div class="quiz-options" id="q1-1">
+                        <button class="quiz-option" data-correct="false">A) Un document de facturation</button>
+                        <button class="quiz-option" data-correct="true">B) Une unité de travail à réaliser (bug, feature, tâche)</button>
+                        <button class="quiz-option" data-correct="false">C) Une permission d'accès au projet</button>
+                    </div>
+                    <div class="quiz-feedback">
+                        <div class="feedback-text"></div>
+                    </div>
+                </div>
+
+                <div class="quiz-question">
+                    <div class="question-text">2. Quel type de ticket correspond à cette situation : "Le bouton de connexion ne répond pas" ?</div>
+                    <div class="quiz-options" id="q1-2">
+                        <button class="quiz-option" data-correct="false">A) Feature (Fonctionnalité)</button>
+                        <button class="quiz-option" data-correct="false">B) Amélioration (Enhancement)</button>
+                        <button class="quiz-option" data-correct="true">C) Bug</button>
+                    </div>
+                    <div class="quiz-feedback">
+                        <div class="feedback-text"></div>
+                    </div>
+                </div>
+
+                <div class="quiz-question">
+                    <div class="question-text">3. Parmi ces exemples, lequel est une "Feature" (nouvelle fonctionnalité) ?</div>
+                    <div class="quiz-options" id="q1-3">
+                        <button class="quiz-option" data-correct="false">A) Corriger l'erreur 500 sur la page profil</button>
+                        <button class="quiz-option" data-correct="true">B) Ajouter un système de commentaires</button>
+                        <button class="quiz-option" data-correct="false">C) Optimiser le temps de chargement de la page</button>
+                    </div>
+                    <div class="quiz-feedback">
+                        <div class="feedback-text"></div>
+                    </div>
+                </div>
+
+                <div class="quiz-question">
+                    <div class="question-text">4. Vrai ou Faux : Un ticket de type "Bug" a généralement une priorité plus haute qu'une "Amélioration".</div>
+                    <div class="quiz-options" id="q1-4">
+                        <button class="quiz-option" data-correct="true">Vrai</button>
+                        <button class="quiz-option" data-correct="false">Faux</button>
+                    </div>
+                    <div class="quiz-feedback">
+                        <div class="feedback-text"></div>
+                    </div>
+                </div>
+
+                <div class="quiz-question">
+                    <div class="question-text">5. Pourquoi utilise-t-on des tickets dans un projet de développement ?</div>
+                    <div class="quiz-options" id="q1-5">
+                        <button class="quiz-option" data-correct="false">A) Uniquement pour facturer le client</button>
+                        <button class="quiz-option" data-correct="true">B) Pour organiser, prioriser et tracer le travail</button>
+                        <button class="quiz-option" data-correct="false">C) Pour remplacer la documentation technique</button>
+                    </div>
+                    <div class="quiz-feedback">
+                        <div class="feedback-text"></div>
+                    </div>
+                </div>
+
+                <div class="quiz-score">
+                    <h4>🎉 Résultat du Quiz 1</h4>
+                    <p class="score-text"></p>
+                </div>
+            </div>
+        </div>
+
+        <!-- Section Trello -->
+        <div id="trello" class="section py-6 md:py-8">
+            <h2>📊 Gestion de tickets dans Trello</h2>
+
+            <div class="intro-dropdown">
+                <div class="intro-header" onclick="toggleIntro(2)">
+                    💡 Trello : Tableaux Kanban visuels
+                    <span class="intro-arrow">▼</span>
+                </div>
+                <div id="intro2" class="intro-content">
+                    <div class="intro-text">
+                        <p><strong>🎯 Objectif :</strong> Utiliser Trello pour organiser vos tickets de façon visuelle avec la méthode Kanban.</p>
+
+                        <h4>📋 Qu'est-ce que Trello ?</h4>
+                        <p>Trello est un outil de gestion de projet basé sur des <strong>tableaux, listes et cartes</strong>. Chaque carte = un ticket !</p>
+
+                        <h4>✨ Points forts de Trello</h4>
+                        <ul>
+                            <li><strong>Simplicité</strong> : Interface intuitive, apprentissage rapide</li>
+                            <li><strong>Visuel</strong> : Vue Kanban claire de l'avancement</li>
+                            <li><strong>Flexibilité</strong> : S'adapte à tous types de projets</li>
+                            <li><strong>Collaboration</strong> : Partage facile avec l'équipe</li>
+                            <li><strong>Gratuit</strong> : Version gratuite très complète</li>
+                        </ul>
+
+                        <div class="intro-highlight">
+                            <strong>🎯 Analogie :</strong> Trello est comme un tableau blanc avec des post-it que vous pouvez déplacer d'une colonne à l'autre pour montrer la progression.
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <h3>🏗️ Structure d'un projet Trello</h3>
+
+            <div class="workflow-steps">
+                <div class="workflow-step">
+                    <h4>📝 Backlog</h4>
+                    <p>Toutes les idées et tâches à faire</p>
+                </div>
+                <div class="workflow-step">
+                    <h4>🎯 À faire</h4>
+                    <p>Tickets priorisés pour le sprint</p>
+                </div>
+                <div class="workflow-step">
+                    <h4>⚙️ En cours</h4>
+                    <p>Tickets en développement</p>
+                </div>
+                <div class="workflow-step">
+                    <h4>✅ Terminé</h4>
+                    <p>Tickets complétés</p>
+                </div>
+            </div>
+
+            <h3>🎫 Anatomie d'une carte Trello (ticket)</h3>
+            <div class="best-practices">
+                <ul>
+                    <li><strong>Titre clair</strong> : "🐛 Corriger le bug de connexion" ou "✨ Ajouter filtre par date"</li>
+                    <li><strong>Description détaillée</strong> : Contexte, objectif, critères d'acceptation</li>
+                    <li><strong>Labels/Étiquettes</strong> : Bug (rouge), Feature (bleu), Priorité haute (orange)</li>
+                    <li><strong>Membres assignés</strong> : Qui est responsable du ticket</li>
+                    <li><strong>Date d'échéance</strong> : Deadline du ticket</li>
+                    <li><strong>Checklist</strong> : Sous-tâches à cocher</li>
+                    <li><strong>Pièces jointes</strong> : Screenshots, maquettes, documents</li>
+                    <li><strong>Commentaires</strong> : Discussion sur le ticket</li>
+                </ul>
+            </div>
+
+            <h3>💡 Bonnes pratiques Trello</h3>
+            <div class="comparison-grid" style="grid-template-columns: 1fr;">
+                <div class="comparison-card">
+                    <h4>✅ À faire</h4>
+                    <ul style="margin-left: 20px; margin-top: 15px;">
+                        <li>✓ Utiliser des emojis pour identifier rapidement les types (🐛 bug, ✨ feature)</li>
+                        <li>✓ Limiter le nombre de cartes "En cours" (max 2-3 par personne)</li>
+                        <li>✓ Ajouter une checklist dans chaque carte avec les étapes</li>
+                        <li>✓ Déplacer les cartes régulièrement pour refléter l'avancement</li>
+                        <li>✓ Archiver les cartes terminées pour garder un tableau propre</li>
+                        <li>✓ Utiliser des couleurs cohérentes pour les labels</li>
+                    </ul>
+                </div>
+            </div>
+
+            <div class="alert alert-info">
+                <div class="alert-icon">💡</div>
+                <div>
+                    <strong>Astuce Pro :</strong> Créez des templates de cartes pour les types récurrents (bug report, nouvelle feature). Cela vous fera gagner du temps et assurera la cohérence !
+                </div>
+            </div>
+
+            <div class="alert alert-success">
+                <div class="alert-icon">🎓</div>
+                <div>
+                    <strong>Pour aller plus loin :</strong> Trello propose des Power-Ups (extensions) comme Calendar, Custom Fields, ou Voting pour enrichir vos tableaux.
+                </div>
+            </div>
+        </div>
+
+        <!-- Section Notion -->
+        <div id="notion" class="section py-6 md:py-8">
+            <h2>📚 Gestion de tickets dans Notion</h2>
+
+            <div class="intro-dropdown">
+                <div class="intro-header" onclick="toggleIntro(3)">
+                    💡 Notion : Base de données flexible et puissante
+                    <span class="intro-arrow">▼</span>
+                </div>
+                <div id="intro3" class="intro-content">
+                    <div class="intro-text">
+                        <p><strong>🎯 Objectif :</strong> Utiliser Notion pour créer une base de données de tickets avec plusieurs vues et propriétés personnalisées.</p>
+
+                        <h4>📚 Qu'est-ce que Notion ?</h4>
+                        <p>Notion est un outil tout-en-un qui combine <strong>wiki, base de données et gestion de projet</strong>. Plus puissant mais aussi plus complexe que Trello.</p>
+
+                        <h4>✨ Points forts de Notion</h4>
+                        <ul>
+                            <li><strong>Flexibilité</strong> : Créez exactement la structure dont vous avez besoin</li>
+                            <li><strong>Vues multiples</strong> : Tableau, Kanban, Calendrier, Timeline</li>
+                            <li><strong>Propriétés riches</strong> : Select, Multi-select, Formules, Relations</li>
+                            <li><strong>Documentation intégrée</strong> : Pages imbriquées pour la doc projet</li>
+                            <li><strong>Collaboration</strong> : Commentaires, mentions, historique</li>
+                        </ul>
+
+                        <div class="intro-highlight">
+                            <strong>🎯 Analogie :</strong> Si Trello est un tableau de post-it, Notion est un classeur Excel surpuissant avec des vues personnalisables.
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <h3>🏗️ Structure d'une base de données tickets Notion</h3>
+
+            <div class="best-practices">
+                <h4 style="margin-bottom: 15px;">📊 Propriétés essentielles d'un ticket :</h4>
+                <ul>
+                    <li><strong>Titre</strong> (Text) : Nom du ticket</li>
+                    <li><strong>Type</strong> (Select) : Bug, Feature, Tâche, Amélioration</li>
+                    <li><strong>Statut</strong> (Select) : Backlog, À faire, En cours, En test, Terminé</li>
+                    <li><strong>Priorité</strong> (Select) : Critique, Haute, Moyenne, Basse</li>
+                    <li><strong>Assigné à</strong> (Person) : Qui travaille dessus</li>
+                    <li><strong>Sprint</strong> (Select) : Sprint 1, Sprint 2, etc.</li>
+                    <li><strong>Date limite</strong> (Date) : Deadline du ticket</li>
+                    <li><strong>Estimation</strong> (Number) : Temps estimé en heures</li>
+                    <li><strong>Tags</strong> (Multi-select) : Frontend, Backend, Design, etc.</li>
+                </ul>
+            </div>
+
+            <h3>👁️ Les différentes vues Notion</h3>
+
+            <div class="ticket-cards">
+                <div class="ticket-card ticket-bug">
+                    <div class="ticket-icon">📊</div>
+                    <h3 style="color: #ef4444;">Vue Tableau</h3>
+                    <p>Tableau classique avec lignes et colonnes. Idéal pour avoir une vue d'ensemble avec toutes les propriétés visibles.</p>
+                    <br>
+                    <p><strong>Usage :</strong> Consulter rapidement tous les détails</p>
+                </div>
+
+                <div class="ticket-card ticket-feature">
+                    <div class="ticket-icon">📋</div>
+                    <h3 style="color: #3b82f6;">Vue Kanban</h3>
+                    <p>Cartes organisées en colonnes par statut. Comme Trello ! Parfait pour visualiser le flux de travail.</p>
+                    <br>
+                    <p><strong>Usage :</strong> Gestion quotidienne du sprint</p>
+                </div>
+
+                <div class="ticket-card ticket-task">
+                    <div class="ticket-icon">📅</div>
+                    <h3 style="color: #f59e0b;">Vue Calendrier</h3>
+                    <p>Tickets affichés sur un calendrier selon leur date limite. Super pour gérer les deadlines.</p>
+                    <br>
+                    <p><strong>Usage :</strong> Planification temporelle</p>
+                </div>
+
+                <div class="ticket-card ticket-improvement">
+                    <div class="ticket-icon">📈</div>
+                    <h3 style="color: #10b981;">Vue Timeline</h3>
+                    <p>Vue Gantt pour voir les dépendances et la chronologie du projet sur une ligne de temps.</p>
+                    <br>
+                    <p><strong>Usage :</strong> Vision long terme du projet</p>
+                </div>
+            </div>
+
+            <h3>💡 Bonnes pratiques Notion</h3>
+            <div class="comparison-grid" style="grid-template-columns: 1fr;">
+                <div class="comparison-card">
+                    <h4>✅ À faire</h4>
+                    <ul style="margin-left: 20px; margin-top: 15px;">
+                        <li>✓ Créer des templates de tickets pour chaque type (Bug, Feature, etc.)</li>
+                        <li>✓ Utiliser les formules pour calculer automatiquement (ex: charge totale du sprint)</li>
+                        <li>✓ Relier les tickets à d'autres bases (ex: base "Sprints", base "Membres")</li>
+                        <li>✓ Ajouter des filtres et tris personnalisés dans chaque vue</li>
+                        <li>✓ Utiliser les sous-pages pour la documentation détaillée</li>
+                        <li>✓ Configurer des rappels pour les deadlines importantes</li>
+                    </ul>
+                </div>
+            </div>
+
+            <h3>🆚 Trello vs Notion : Quand utiliser quoi ?</h3>
+
+            <div class="comparison-grid">
+                <div class="comparison-card">
+                    <h4>📊 Utilisez Trello si :</h4>
+                    <ul style="margin-left: 20px; margin-top: 15px;">
+                        <li>✓ Besoin de simplicité et rapidité</li>
+                        <li>✓ Projet court ou équipe petite (2-5 personnes)</li>
+                        <li>✓ Workflow simple (Kanban classique)</li>
+                        <li>✓ Apprentissage rapide nécessaire</li>
+                        <li>✓ Focus sur le visuel et la clarté</li>
+                    </ul>
+                </div>
+
+                <div class="comparison-card">
+                    <h4>📚 Utilisez Notion si :</h4>
+                    <ul style="margin-left: 20px; margin-top: 15px;">
+                        <li>✓ Projet complexe avec beaucoup de données</li>
+                        <li>✓ Besoin de vues multiples</li>
+                        <li>✓ Documentation importante à gérer</li>
+                        <li>✓ Relations entre tickets nécessaires</li>
+                        <li>✓ Reporting et analyses avancés</li>
+                    </ul>
+                </div>
+            </div>
+
+            <div class="alert alert-info">
+                <div class="alert-icon">💡</div>
+                <div>
+                    <strong>Conseil :</strong> Pour débuter, commencez avec Trello pour sa simplicité. Une fois à l'aise, explorez Notion pour des projets plus complexes nécessitant plus de structure et de données.
+                </div>
+            </div>
+        </div>
+
+        <!-- Section GLPI -->
+        <div id="glpi" class="section py-6 md:py-8">
+            <h2>🏢 Introduction à GLPI</h2>
+
+            <div class="intro-dropdown">
+                <div class="intro-header" onclick="toggleIntro(4)">
+                    💡 GLPI : Outil professionnel de ticketing IT
+                    <span class="intro-arrow">▼</span>
+                </div>
+                <div id="intro4" class="intro-content">
+                    <div class="intro-text">
+                        <p><strong>🎯 Objectif :</strong> Découvrir GLPI, un outil professionnel utilisé par les équipes IT pour la gestion des incidents et demandes.</p>
+
+                        <h4>🏢 Qu'est-ce que GLPI ?</h4>
+                        <p><strong>GLPI</strong> (Gestion Libre de Parc Informatique) est un <strong>logiciel open source</strong> de gestion de services IT. Il est très utilisé dans les entreprises pour :</p>
+                        <ul>
+                            <li>🎫 Gérer les <strong>tickets de support</strong> (incidents, demandes)</li>
+                            <li>💻 Inventorier le <strong>matériel informatique</strong></li>
+                            <li>📋 Suivre les <strong>contrats et licences</strong></li>
+                            <li>📊 Générer des <strong>rapports et statistiques</strong></li>
+                        </ul>
+
+                        <div class="intro-highlight">
+                            <strong>🎯 Différence clé :</strong> Trello/Notion sont pour la gestion de projet de développement. GLPI est pour le support IT et la gestion d'incidents (helpdesk).
+                        </div>
+
+                        <h4>🌟 Pourquoi connaître GLPI ?</h4>
+                        <ul>
+                            <li><strong>Standard professionnel</strong> : Utilisé par de nombreuses entreprises et administrations</li>
+                            <li><strong>Compétence demandée</strong> : Souvent recherché dans les offres d'emploi IT</li>
+                            <li><strong>Processus ITIL</strong> : Basé sur les meilleures pratiques de gestion des services IT</li>
+                            <li><strong>Gratuit et open source</strong> : Vous pouvez l'installer pour apprendre</li>
+                        </ul>
+                    </div>
+                </div>
+            </div>
+
+            <h3>🎫 Types de tickets dans GLPI</h3>
+
+            <div class="ticket-cards">
+                <div class="ticket-card ticket-bug">
+                    <div class="ticket-icon">🚨</div>
+                    <h3 style="color: #ef4444;">Incident</h3>
+                    <p><strong>Définition :</strong> Interruption non planifiée ou dégradation de service</p>
+                    <br>
+                    <p><strong>Exemple :</strong> "Mon ordinateur ne démarre plus", "Impossible d'accéder au serveur"</p>
+                    <br>
+                    <p><strong>Objectif :</strong> Restaurer le service normal le plus vite possible</p>
+                </div>
+
+                <div class="ticket-card ticket-feature">
+                    <div class="ticket-icon">📝</div>
+                    <h3 style="color: #3b82f6;">Demande</h3>
+                    <p><strong>Définition :</strong> Demande de service, information ou changement</p>
+                    <br>
+                    <p><strong>Exemple :</strong> "J'ai besoin d'un nouveau logiciel", "Changer mon mot de passe"</p>
+                    <br>
+                    <p><strong>Objectif :</strong> Répondre à un besoin utilisateur</p>
+                </div>
+
+                <div class="ticket-card ticket-task">
+                    <div class="ticket-icon">🔧</div>
+                    <h3 style="color: #f59e0b;">Problème</h3>
+                    <p><strong>Définition :</strong> Cause racine d'un ou plusieurs incidents</p>
+                    <br>
+                    <p><strong>Exemple :</strong> "Le serveur redémarre sans arrêt" (cause de plusieurs incidents)</p>
+                    <br>
+                    <p><strong>Objectif :</strong> Trouver et résoudre la cause sous-jacente</p>
+                </div>
+
+                <div class="ticket-card ticket-improvement">
+                    <div class="ticket-icon">🔄</div>
+                    <h3 style="color: #10b981;">Changement</h3>
+                    <p><strong>Définition :</strong> Modification planifiée de l'infrastructure</p>
+                    <br>
+                    <p><strong>Exemple :</strong> "Migration du serveur", "Mise à jour du système"</p>
+                    <br>
+                    <p><strong>Objectif :</strong> Gérer le changement de manière contrôlée</p>
+                </div>
+            </div>
+
+            <h3>🔄 Cycle de vie d'un ticket GLPI</h3>
+
+            <div class="workflow-steps">
+                <div class="workflow-step">
+                    <h4>📥 Nouveau</h4>
+                    <p>Ticket créé</p>
+                </div>
+                <div class="workflow-step">
+                    <h4>🎯 Assigné</h4>
+                    <p>Attribué à un technicien</p>
+                </div>
+                <div class="workflow-step">
+                    <h4>⚙️ En cours</h4>
+                    <p>Traitement du ticket</p>
+                </div>
+                <div class="workflow-step">
+                    <h4>⏸️ En attente</h4>
+                    <p>Attend retour utilisateur</p>
+                </div>
+                <div class="workflow-step">
+                    <h4>✅ Résolu</h4>
+                    <p>Solution appliquée</p>
+                </div>
+                <div class="workflow-step">
+                    <h4>🔒 Clos</h4>
+                    <p>Validé et fermé</p>
+                </div>
+            </div>
+
+            <h3>📊 Concepts clés GLPI</h3>
+
+            <div class="best-practices">
+                <ul>
+                    <li><strong>SLA (Service Level Agreement)</strong> : Délai maximum de résolution selon la priorité</li>
+                    <li><strong>Catégories</strong> : Matériel, Logiciel, Réseau, Accès... pour classer les tickets</li>
+                    <li><strong>Priorité</strong> : Calculée automatiquement (Impact × Urgence)</li>
+                    <li><strong>Escalade</strong> : Transmission à un niveau supérieur si non résolu à temps</li>
+                    <li><strong>Base de connaissances</strong> : Solutions réutilisables pour problèmes courants</li>
+                    <li><strong>Suivi</strong> : Historique de toutes les actions sur le ticket</li>
+                </ul>
+            </div>
+
+            <div class="alert alert-info">
+                <div class="alert-icon">💡</div>
+                <div>
+                    <strong>Pour votre culture :</strong> GLPI est basé sur ITIL (Information Technology Infrastructure Library), un référentiel de bonnes pratiques pour la gestion des services IT utilisé mondialement.
+                </div>
+            </div>
+
+            <div class="alert alert-success">
+                <div class="alert-icon">🎓</div>
+                <div>
+                    <strong>En résumé :</strong> Vous n'utiliserez pas GLPI pour vos projets de développement étudiants, mais vous le rencontrerez probablement en stage ou en entreprise pour gérer le support utilisateur !
+                </div>
+            </div>
+        </div>
+
+        <!-- Quiz 2 -->
+        <div class="quiz-container">
+            <div class="quiz-header" onclick="toggleQuiz(2)">
+                <span>🎯 Quiz 2 : Outils de gestion (Trello, Notion, GLPI)</span>
+                <span class="quiz-arrow">▼</span>
+            </div>
+            <div id="quiz2" class="quiz-content">
+                <div class="quiz-question">
+                    <div class="question-text">1. Dans Trello, comment appelle-t-on un ticket ?</div>
+                    <div class="quiz-options" id="q2-1">
+                        <button class="quiz-option" data-correct="false">A) Un tableau (board)</button>
+                        <button class="quiz-option" data-correct="true">B) Une carte (card)</button>
+                        <button class="quiz-option" data-correct="false">C) Une liste (list)</button>
+                    </div>
+                    <div class="quiz-feedback">
+                        <div class="feedback-text"></div>
+                    </div>
+                </div>
+
+                <div class="quiz-question">
+                    <div class="question-text">2. Quelle est la principale différence entre Trello et Notion ?</div>
+                    <div class="quiz-options" id="q2-2">
+                        <button class="quiz-option" data-correct="false">A) Trello est payant, Notion est gratuit</button>
+                        <button class="quiz-option" data-correct="false">B) Il n'y a aucune différence</button>
+                        <button class="quiz-option" data-correct="true">C) Trello est plus simple et visuel, Notion est plus puissant avec bases de données</button>
+                    </div>
+                    <div class="quiz-feedback">
+                        <div class="feedback-text"></div>
+                    </div>
+                </div>
+
+                <div class="quiz-question">
+                    <div class="question-text">3. Vrai ou Faux : Dans GLPI, un "Incident" est la même chose qu'un "Problème".</div>
+                    <div class="quiz-options" id="q2-3">
+                        <button class="quiz-option" data-correct="false">Vrai</button>
+                        <button class="quiz-option" data-correct="true">Faux - Incident = symptôme, Problème = cause racine</button>
+                    </div>
+                    <div class="quiz-feedback">
+                        <div class="feedback-text"></div>
+                    </div>
+                </div>
+
+                <div class="quiz-question">
+                    <div class="question-text">4. Quel outil est principalement utilisé pour le support IT et la gestion d'incidents en entreprise ?</div>
+                    <div class="quiz-options" id="q2-4">
+                        <button class="quiz-option" data-correct="false">A) Trello</button>
+                        <button class="quiz-option" data-correct="true">B) GLPI</button>
+                        <button class="quiz-option" data-correct="false">C) Notion</button>
+                    </div>
+                    <div class="quiz-feedback">
+                        <div class="feedback-text"></div>
+                    </div>
+                </div>
+
+                <div class="quiz-question">
+                    <div class="question-text">5. Combien de tickets une personne devrait-elle avoir "En cours" en même temps selon les bonnes pratiques Trello/Kanban ?</div>
+                    <div class="quiz-options" id="q2-5">
+                        <button class="quiz-option" data-correct="true">A) 2-3 maximum (WIP Limit)</button>
+                        <button class="quiz-option" data-correct="false">B) 10+ pour être productif</button>
+                        <button class="quiz-option" data-correct="false">C) Pas de limite</button>
+                    </div>
+                    <div class="quiz-feedback">
+                        <div class="feedback-text"></div>
+                    </div>
+                </div>
+
+                <div class="quiz-score">
+                    <h4>🎉 Résultat du Quiz 2</h4>
+                    <p class="score-text"></p>
+                </div>
+            </div>
+        </div>
+
+        <!-- Section Scrum -->
+        <div id="scrum" class="section py-6 md:py-8">
+            <h2>🔄 Intégration des tickets dans Scrum</h2>
+
+            <div class="intro-dropdown">
+                <div class="intro-header" onclick="toggleIntro(5)">
+                    💡 Comment les tickets s'intègrent dans un sprint Scrum
+                    <span class="intro-arrow">▼</span>
+                </div>
+                <div id="intro5" class="intro-content">
+                    <div class="intro-text">
+                        <p><strong>🎯 Objectif :</strong> Comprendre comment organiser vos tickets dans le cadre d'une méthodologie Scrum.</p>
+
+                        <h4>🔄 Rappel : Les bases de Scrum</h4>
+                        <p>Vous connaissez déjà ces concepts :</p>
+                        <ul>
+                            <li><strong>Product Backlog</strong> : Liste priorisée de toutes les fonctionnalités à développer</li>
+                            <li><strong>Sprint</strong> : Itération de 1-4 semaines pour développer un incrément</li>
+                            <li><strong>Sprint Backlog</strong> : Tickets sélectionnés pour le sprint en cours</li>
+                            <li><strong>User Story</strong> : Fonctionnalité exprimée du point de vue utilisateur</li>
+                        </ul>
+
+                        <div class="intro-highlight">
+                            <strong>🎯 Le lien :</strong> Chaque élément du backlog (user story, bug, tâche) devient un ticket dans votre outil (Trello/Notion). Les tickets sont la représentation concrète de votre backlog !
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <h3>📋 De la User Story au Ticket</h3>
+
+            <div class="comparison-grid">
+                <div class="comparison-card">
+                    <h4>📝 User Story (Concept Scrum)</h4>
+                    <p style="margin: 15px 0;"><strong>Format :</strong> "En tant que [utilisateur], je veux [action] afin de [bénéfice]"</p>
+                    <p style="font-style: italic; color: #666;">Exemple : "En tant qu'utilisateur, je veux pouvoir filtrer les produits par prix afin de trouver rapidement ce qui correspond à mon budget"</p>
+                </div>
+
+                <div class="comparison-card">
+                    <h4>🎫 Ticket (Implémentation pratique)</h4>
+                    <p style="margin: 15px 0;"><strong>Titre :</strong> "✨ Ajouter filtre par prix"</p>
+                    <p style="margin: 10px 0;"><strong>Description :</strong> User story + critères d'acceptation + spécifications techniques</p>
+                    <p style="margin: 10px 0;"><strong>Checklist :</strong></p>
+                    <ul style="margin-left: 20px;">
+                        <li>☐ Design UI du filtre</li>
+                        <li>☐ API backend</li>
+                        <li>☐ Intégration frontend</li>
+                        <li>☐ Tests</li>
+                    </ul>
+                </div>
+            </div>
+
+            <h3>🔄 Workflow Scrum avec tickets</h3>
+
+            <div class="workflow-steps">
+                <div class="workflow-step">
+                    <h4>1️⃣ Product Backlog</h4>
+                    <p>Tous les tickets du projet, priorisés par le Product Owner</p>
+                </div>
+                <div class="workflow-step">
+                    <h4>2️⃣ Sprint Planning</h4>
+                    <p>Sélection des tickets pour le sprint (Sprint Backlog)</p>
+                </div>
+                <div class="workflow-step">
+                    <h4>3️⃣ Sprint</h4>
+                    <p>Déplacement des tickets : À faire → En cours → Terminé</p>
+                </div>
+                <div class="workflow-step">
+                    <h4>4️⃣ Sprint Review</h4>
+                    <p>Démonstration des tickets terminés</p>
+                </div>
+                <div class="workflow-step">
+                    <h4>5️⃣ Sprint Retro</h4>
+                    <p>Amélioration du processus de gestion des tickets</p>
+                </div>
+            </div>
+
+            <h3>🎯 Organisation des tickets dans un sprint</h3>
+
+            <div class="best-practices">
+                <h4 style="margin-bottom: 15px;">📊 Structure recommandée dans Trello/Notion :</h4>
+                <ul>
+                    <li><strong>Product Backlog</strong> : Colonne/Vue avec TOUS les tickets, triés par priorité</li>
+                    <li><strong>Sprint Backlog</strong> : Colonne/Vue avec tickets du sprint actuel uniquement</li>
+                    <li><strong>En cours (WIP Limit)</strong> : Max 2-3 tickets par personne en même temps</li>
+                    <li><strong>À vérifier / En test</strong> : Tickets terminés mais pas encore validés</li>
+                    <li><strong>Done (Definition of Done)</strong> : Tickets complètement terminés selon vos critères</li>
+                </ul>
+            </div>
+
+            <h3>📈 Estimer les tickets (Story Points)</h3>
+
+            <div class="ticket-cards">
+                <div class="ticket-card ticket-improvement">
+                    <div class="ticket-icon">1️⃣</div>
+                    <h3 style="color: #10b981;">1-2 points</h3>
+                    <p><strong>Très simple</strong></p>
+                    <p>Quelques heures de travail. Ex: Changer un texte, corriger une faute de frappe</p>
+                </div>
+
+                <div class="ticket-card ticket-task">
+                    <div class="ticket-icon">3️⃣</div>
+                    <h3 style="color: #f59e0b;">3-5 points</h3>
+                    <p><strong>Moyen</strong></p>
+                    <p>1-2 jours de travail. Ex: Ajouter un formulaire simple, corriger un bug classique</p>
+                </div>
+
+                <div class="ticket-card ticket-feature">
+                    <div class="ticket-icon">8️⃣</div>
+                    <h3 style="color: #3b82f6;">8-13 points</h3>
+                    <p><strong>Complexe</strong></p>
+                    <p>3-5 jours de travail. Ex: Nouvelle fonctionnalité complète avec API et UI</p>
+                </div>
+
+                <div class="ticket-card ticket-bug">
+                    <div class="ticket-icon">❓</div>
+                    <h3 style="color: #ef4444;">20+ points</h3>
+                    <p><strong>Epic - À découper !</strong></p>
+                    <p>Trop gros pour un sprint. Il faut le diviser en plusieurs tickets plus petits</p>
+                </div>
+            </div>
+
+            <h3>💡 Bonnes pratiques tickets + Scrum</h3>
+
+            <div class="comparison-grid" style="grid-template-columns: 1fr;">
+                <div class="comparison-card">
+                    <h4>✅ Règles d'or</h4>
+                    <ul style="margin-left: 20px; margin-top: 15px;">
+                        <li>✓ <strong>Un ticket = une personne</strong> : Assignez toujours un responsable unique</li>
+                        <li>✓ <strong>Tickets "Sprint-ready"</strong> : Description complète AVANT le sprint planning</li>
+                        <li>✓ <strong>Daily Scrum</strong> : Mettre à jour les tickets tous les jours</li>
+                        <li>✓ <strong>Pas de modification en sprint</strong> : Le Sprint Backlog est figé (sauf urgence)</li>
+                        <li>✓ <strong>Definition of Done claire</strong> : Quand considère-t-on un ticket vraiment terminé ?</li>
+                        <li>✓ <strong>Retrospective</strong> : Améliorer le système de tickets à chaque sprint</li>
+                    </ul>
+                </div>
+            </div>
+
+            <div class="alert alert-warning">
+                <div class="alert-icon">⚠️</div>
+                <div>
+                    <strong>Erreur fréquente :</strong> Commencer un sprint avec des tickets mal définis. Résultat : perte de temps en réunions pour clarifier en cours de sprint. Investissez du temps dans le "grooming" du backlog AVANT le sprint !
+                </div>
+            </div>
+
+            <div class="alert alert-success">
+                <div class="alert-icon">🎯</div>
+                <div>
+                    <strong>Métrique utile :</strong> La <strong>vélocité</strong> = nombre de story points complétés par sprint. Après 2-3 sprints, vous pouvez prédire combien de tickets vous pouvez réaliser dans les prochains sprints !
+                </div>
+            </div>
+        </div>
+
+        <!-- Section Bonnes Pratiques -->
+        <div id="bonnes-pratiques" class="section py-6 md:py-8">
+            <h2>⭐ Bonnes pratiques de rédaction de tickets</h2>
+
+            <div class="intro-dropdown">
+                <div class="intro-header" onclick="toggleIntro(6)">
+                    💡 Comment rédiger un bon ticket
+                    <span class="intro-arrow">▼</span>
+                </div>
+                <div id="intro6" class="intro-content">
+                    <div class="intro-text">
+                        <p><strong>🎯 Objectif :</strong> Savoir rédiger des tickets clairs, complets et actionnables.</p>
+
+                        <h4>🎯 Qu'est-ce qu'un bon ticket ?</h4>
+                        <p>Un bon ticket doit être <strong>SMART</strong> :</p>
+                        <ul>
+                            <li><strong>S</strong>pécifique : Description précise et sans ambiguïté</li>
+                            <li><strong>M</strong>esurable : Critères d'acceptation clairs</li>
+                            <li><strong>A</strong>ctionnable : On sait quoi faire concrètement</li>
+                            <li><strong>R</strong>éaliste : Faisable dans le temps imparti</li>
+                            <li><strong>T</strong>emporisé : Deadline définie</li>
+                        </ul>
+
+                        <div class="intro-highlight">
+                            <strong>🎯 Règle d'or :</strong> Un ticket doit pouvoir être compris et réalisé par quelqu'un d'autre que vous, même 6 mois après sa création !
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <h3>📝 Anatomie d'un ticket parfait</h3>
+
+            <div class="comparison-grid">
+                <div class="comparison-card" style="border: 3px solid #ef4444;">
+                    <h4 style="color: #ef4444;">❌ Mauvais exemple</h4>
+                    <div style="background: #fee; padding: 15px; border-radius: 8px; margin-top: 15px;">
+                        <p><strong>Titre :</strong> Problème connexion</p>
+                        <p style="margin-top: 10px;"><strong>Description :</strong> Ça marche pas</p>
+                        <p style="margin-top: 10px;"><em>Assigné à : Personne</em></p>
+                        <p style="margin-top: 10px;"><em>Priorité : Non définie</em></p>
+                    </div>
+                    <p style="margin-top: 15px; color: #666;">⚠️ Imprécis, pas d'information utile, impossible à traiter</p>
+                </div>
+
+                <div class="comparison-card" style="border: 3px solid #10b981;">
+                    <h4 style="color: #10b981;">✅ Bon exemple</h4>
+                    <div style="background: #efe; padding: 15px; border-radius: 8px; margin-top: 15px;">
+                        <p><strong>Titre :</strong> 🐛 [Login] Erreur 500 à la connexion avec email contenant un +</p>
+                        <p style="margin-top: 10px;"><strong>Type :</strong> Bug | <strong>Priorité :</strong> Haute</p>
+                        <p style="margin-top: 10px;"><strong>Description :</strong></p>
+                        <ul style="margin-left: 20px; margin-top: 5px;">
+                            <li>Contexte : Page de login</li>
+                            <li>Comportement : Erreur 500 pour emails avec "+"</li>
+                            <li>Attendu : Connexion fonctionnelle</li>
+                            <li>Impact : 5% des utilisateurs concernés</li>
+                        </ul>
+                        <p style="margin-top: 10px;"><strong>Steps to reproduce :</strong></p>
+                        <ol style="margin-left: 20px;">
+                            <li>Aller sur /login</li>
+                            <li>Saisir: test+alias@email.com</li>
+                            <li>Cliquer "Se connecter"</li>
+                            <li>→ Erreur 500</li>
+                        </ol>
+                        <p style="margin-top: 10px;"><strong>Environnement :</strong> Chrome 120, Windows 11</p>
+                        <p style="margin-top: 10px;"><em>Assigné à : Jean | Deadline : 15/01/2025</em></p>
+                    </div>
+                    <p style="margin-top: 15px; color: #666;">✓ Clair, complet, reproductible, actionnable</p>
+                </div>
+            </div>
+
+            <h3>📋 Template pour différents types de tickets</h3>
+
+            <div class="best-practices">
+                <h4 style="margin-bottom: 15px;">🐛 Template Bug Report :</h4>
+                <ul>
+                    <li><strong>Titre :</strong> [Composant] Description courte du problème</li>
+                    <li><strong>Description :</strong> Quel est le problème ?</li>
+                    <li><strong>Steps to reproduce :</strong> 1. ... 2. ... 3. ...</li>
+                    <li><strong>Comportement attendu :</strong> Ce qui devrait se passer</li>
+                    <li><strong>Comportement actuel :</strong> Ce qui se passe réellement</li>
+                    <li><strong>Environnement :</strong> OS, Navigateur, Version</li>
+                    <li><strong>Screenshots / Vidéo :</strong> Si applicable</li>
+                    <li><strong>Logs d'erreur :</strong> Messages console / serveur</li>
+                </ul>
+            </div>
+
+            <div class="best-practices">
+                <h4 style="margin-bottom: 15px;">✨ Template Feature Request :</h4>
+                <ul>
+                    <li><strong>Titre :</strong> [Action] Description de la fonctionnalité</li>
+                    <li><strong>User Story :</strong> En tant que [qui], je veux [quoi] afin de [pourquoi]</li>
+                    <li><strong>Contexte :</strong> Pourquoi cette feature est importante</li>
+                    <li><strong>Critères d'acceptation :</strong> Liste des conditions pour considérer la feature terminée</li>
+                    <li><strong>Maquettes / Wireframes :</strong> Si disponibles</li>
+                    <li><strong>Spécifications techniques :</strong> Contraintes / dépendances</li>
+                    <li><strong>Estimation :</strong> Story points ou temps estimé</li>
+                </ul>
+            </div>
+
+            <h3>✅ Règles de nommage des tickets</h3>
+
+            <div class="comparison-grid" style="grid-template-columns: 1fr;">
+                <div class="comparison-card">
+                    <h4>🏷️ Convention de nommage recommandée</h4>
+                    <ul style="margin-left: 20px; margin-top: 15px;">
+                        <li>✓ <strong>Emoji de type</strong> : 🐛 Bug | ✨ Feature | 📋 Task | 🚀 Enhancement</li>
+                        <li>✓ <strong>[Composant]</strong> : Module/Page concernée (ex: [Login], [API], [Dashboard])</li>
+                        <li>✓ <strong>Verbe d'action</strong> : Corriger, Ajouter, Implémenter, Optimiser, Refactorer</li>
+                        <li>✓ <strong>Description courte</strong> : Max 60 caractères pour la lisibilité</li>
+                    </ul>
+                    <br>
+                    <p><strong>Exemples :</strong></p>
+                    <ul style="margin-left: 20px; margin-top: 10px;">
+                        <li>✓ "🐛 [Login] Corriger erreur 500 avec emails contenant +"</li>
+                        <li>✓ "✨ [Dashboard] Ajouter graphique de statistiques mensuelles"</li>
+                        <li>✓ "📋 [Doc] Rédiger guide d'installation pour développeurs"</li>
+                        <li>✓ "🚀 [API] Optimiser temps de réponse endpoint /users"</li>
+                    </ul>
+                </div>
+            </div>
+
+            <h3>🎯 Les 10 commandements du ticket parfait</h3>
+
+            <div class="best-practices">
+                <ul>
+                    <li><strong>1. Un titre clair tu écriras</strong> - Quelqu'un doit comprendre le ticket en lisant juste le titre</li>
+                    <li><strong>2. Le contexte tu expliqueras</strong> - Pourquoi ce ticket existe ? Quel est le problème ?</li>
+                    <li><strong>3. Des étapes reproductibles tu donneras</strong> - Pour les bugs, étapes précises pour reproduire</li>
+                    <li><strong>4. Des critères d'acceptation tu définiras</strong> - Comment savoir que c'est terminé ?</li>
+                    <li><strong>5. Un responsable unique tu assigneras</strong> - Pas de ticket sans assignation</li>
+                    <li><strong>6. Une priorité tu établiras</strong> - Critique / Haute / Moyenne / Basse</li>
+                    <li><strong>7. Des screenshots tu attacheras</strong> - Une image vaut 1000 mots</li>
+                    <li><strong>8. Les dépendances tu mentionneras</strong> - Liens avec d'autres tickets si nécessaire</li>
+                    <li><strong>9. Régulièrement tu mettras à jour</strong> - Avancement, blocages, découvertes</li>
+                    <li><strong>10. Respectueux tu resteras</strong> - Ton professionnel même pour signaler des bugs</li>
+                </ul>
+            </div>
+
+            <div class="alert alert-warning">
+                <div class="alert-icon">⚠️</div>
+                <div>
+                    <strong>Erreurs courantes à éviter :</strong>
+                    <ul style="margin-left: 20px; margin-top: 10px;">
+                        <li>❌ Titres vagues : "Problème", "Ça marche pas", "Amélioration"</li>
+                        <li>❌ Pas de description : Juste un titre sans contexte</li>
+                        <li>❌ Mélanger plusieurs sujets : 1 ticket = 1 problème/feature</li>
+                        <li>❌ Pas d'assignation : Tickets orphelins que personne ne prend</li>
+                        <li>❌ Oublier de fermer : Tickets "fantômes" en statut ouvert alors que terminés</li>
+                    </ul>
+                </div>
+            </div>
+
+            <div class="alert alert-success">
+                <div class="alert-icon">💡</div>
+                <div>
+                    <strong>Astuce Pro :</strong> Créez des templates de tickets dans votre outil (Trello/Notion) pour chaque type. Cela assure la cohérence et fait gagner du temps !
+                </div>
+            </div>
+        </div>
+
+        <!-- Quiz 3 -->
+        <div class="quiz-container">
+            <div class="quiz-header" onclick="toggleQuiz(3)">
+                <span>🎯 Quiz 3 : Scrum et Bonnes pratiques</span>
+                <span class="quiz-arrow">▼</span>
+            </div>
+            <div id="quiz3" class="quiz-content">
+                <div class="quiz-question">
+                    <div class="question-text">1. Dans un sprint Scrum, que contient le Sprint Backlog ?</div>
+                    <div class="quiz-options" id="q3-1">
+                        <button class="quiz-option" data-correct="false">A) Tous les tickets du projet</button>
+                        <button class="quiz-option" data-correct="false">B) Les tickets terminés des sprints précédents</button>
+                        <button class="quiz-option" data-correct="true">C) Uniquement les tickets sélectionnés pour le sprint en cours</button>
+                    </div>
+                    <div class="quiz-feedback">
+                        <div class="feedback-text"></div>
+                    </div>
+                </div>
+
+                <div class="quiz-question">
+                    <div class="question-text">2. Qu'est-ce que la vélocité dans Scrum ?</div>
+                    <div class="quiz-options" id="q3-2">
+                        <button class="quiz-option" data-correct="true">A) Le nombre de story points complétés par sprint</button>
+                        <button class="quiz-option" data-correct="false">B) La vitesse de connexion internet de l'équipe</button>
+                        <button class="quiz-option" data-correct="false">C) Le nombre de réunions par semaine</button>
+                    </div>
+                    <div class="quiz-feedback">
+                        <div class="feedback-text"></div>
+                    </div>
+                </div>
+
+                <div class="quiz-question">
+                    <div class="question-text">3. Que signifie SMART dans le contexte d'un bon ticket ?</div>
+                    <div class="quiz-options" id="q3-3">
+                        <button class="quiz-option" data-correct="false">A) Simple, Mignon, Artistique, Rapide, Technique</button>
+                        <button class="quiz-option" data-correct="false">B) Système de Management Agile Rapide et Technique</button>
+                        <button class="quiz-option" data-correct="true">C) Spécifique, Mesurable, Actionnable, Réaliste, Temporisé</button>
+                    </div>
+                    <div class="quiz-feedback">
+                        <div class="feedback-text"></div>
+                    </div>
+                </div>
+
+                <div class="quiz-question">
+                    <div class="question-text">4. Vrai ou Faux : Pour un bug, il faut toujours inclure les étapes pour le reproduire (steps to reproduce).</div>
+                    <div class="quiz-options" id="q3-4">
+                        <button class="quiz-option" data-correct="true">Vrai</button>
+                        <button class="quiz-option" data-correct="false">Faux</button>
+                    </div>
+                    <div class="quiz-feedback">
+                        <div class="feedback-text"></div>
+                    </div>
+                </div>
+
+                <div class="quiz-question">
+                    <div class="question-text">5. Qu'est-ce qu'une "Definition of Done" ?</div>
+                    <div class="quiz-options" id="q3-5">
+                        <button class="quiz-option" data-correct="false">A) La date de fin du projet</button>
+                        <button class="quiz-option" data-correct="true">B) Les critères pour considérer un ticket complètement terminé</button>
+                        <button class="quiz-option" data-correct="false">C) Le nom du dernier sprint</button>
+                    </div>
+                    <div class="quiz-feedback">
+                        <div class="feedback-text"></div>
+                    </div>
+                </div>
+
+                <div class="quiz-score">
+                    <h4>🎉 Résultat du Quiz 3</h4>
+                    <p class="score-text"></p>
+                </div>
+            </div>
+        </div>
+
+        <!-- Section Synthèse -->
+        <div id="synthese" class="section py-6 md:py-8">
+            <h2>🎓 Synthèse et Fiche Récapitulative</h2>
+
+            <div class="alert alert-success">
+                <div class="alert-icon">🎉</div>
+                <div>
+                    <strong>Félicitations !</strong> Vous avez maintenant toutes les bases pour gérer efficacement les tickets dans vos projets de développement. Cette compétence est essentielle en entreprise et pour vos projets de BTS !
+                </div>
+            </div>
+
+            <h3>📋 Fiche Récapitulative : Checklist du gestionnaire de tickets</h3>
+
+            <div class="checklist">
+                <h4 style="margin-bottom: 20px; color: #667eea;">✅ Avant de créer un ticket</h4>
+                
+                <div class="checklist-item" onclick="toggleCheckbox(this)">
+                    <div class="checkbox"></div>
+                    <span><strong>Vérifier que le ticket n'existe pas déjà</strong> - Éviter les doublons</span>
+                </div>
+                
+                <div class="checklist-item" onclick="toggleCheckbox(this)">
+                    <div class="checkbox"></div>
+                    <span><strong>Déterminer le type correct</strong> - Bug / Feature / Tâche / Amélioration</span>
+                </div>
+                
+                <div class="checklist-item" onclick="toggleCheckbox(this)">
+                    <div class="checkbox"></div>
+                    <span><strong>Évaluer la priorité</strong> - Critique / Haute / Moyenne / Basse</span>
+                </div>
+
+                <h4 style="margin: 30px 0 20px 0; color: #667eea;">✅ Pendant la rédaction du ticket</h4>
+                
+                <div class="checklist-item" onclick="toggleCheckbox(this)">
+                    <div class="checkbox"></div>
+                    <span><strong>Écrire un titre clair et descriptif</strong> - [Composant] Action description</span>
+                </div>
+                
+                <div class="checklist-item" onclick="toggleCheckbox(this)">
+                    <div class="checkbox"></div>
+                    <span><strong>Ajouter une description complète</strong> - Contexte + objectif</span>
+                </div>
+                
+                <div class="checklist-item" onclick="toggleCheckbox(this)">
+                    <div class="checkbox"></div>
+                    <span><strong>Définir les critères d'acceptation</strong> - Comment savoir que c'est terminé ?</span>
+                </div>
+                
+                <div class="checklist-item" onclick="toggleCheckbox(this)">
+                    <div class="checkbox"></div>
+                    <span><strong>Joindre des screenshots si pertinent</strong> - Une image vaut 1000 mots</span>
+                </div>
+                
+                <div class="checklist-item" onclick="toggleCheckbox(this)">
+                    <div class="checkbox"></div>
+                    <span><strong>Ajouter les steps to reproduce pour les bugs</strong> - Étapes précises</span>
+                </div>
+
+                <h4 style="margin: 30px 0 20px 0; color: #667eea;">✅ Gestion quotidienne</h4>
+                
+                <div class="checklist-item" onclick="toggleCheckbox(this)">
+                    <div class="checkbox"></div>
+                    <span><strong>Assigner un responsable unique</strong> - 1 ticket = 1 personne</span>
+                </div>
+                
+                <div class="checklist-item" onclick="toggleCheckbox(this)">
+                    <div class="checkbox"></div>
+                    <span><strong>Limiter le WIP (Work In Progress)</strong> - Max 2-3 tickets en cours par personne</span>
+                </div>
+                
+                <div class="checklist-item" onclick="toggleCheckbox(this)">
+                    <div class="checkbox"></div>
+                    <span><strong>Mettre à jour le statut régulièrement</strong> - Refléter l'avancement réel</span>
+                </div>
+                
+                <div class="checklist-item" onclick="toggleCheckbox(this)">
+                    <div class="checkbox"></div>
+                    <span><strong>Commenter les blocages ou découvertes</strong> - Communication transparente</span>
+                </div>
+                
+                <div class="checklist-item" onclick="toggleCheckbox(this)">
+                    <div class="checkbox"></div>
+                    <span><strong>Lier les tickets dépendants</strong> - Montrer les relations</span>
+                </div>
+
+                <h4 style="margin: 30px 0 20px 0; color: #667eea;">✅ Dans un contexte Scrum</h4>
+                
+                <div class="checklist-item" onclick="toggleCheckbox(this)">
+                    <div class="checkbox"></div>
+                    <span><strong>Groomer le backlog avant le sprint planning</strong> - Tickets prêts</span>
+                </div>
+                
+                <div class="checklist-item" onclick="toggleCheckbox(this)">
+                    <div class="checkbox"></div>
+                    <span><strong>Estimer les tickets en story points</strong> - Planification réaliste</span>
+                </div>
+                
+                <div class="checklist-item" onclick="toggleCheckbox(this)">
+                    <div class="checkbox"></div>
+                    <span><strong>Ne pas modifier le Sprint Backlog en cours de sprint</strong> - Stabilité</span>
+                </div>
+                
+                <div class="checklist-item" onclick="toggleCheckbox(this)">
+                    <div class="checkbox"></div>
+                    <span><strong>Démo des tickets terminés en Sprint Review</strong> - Transparence</span>
+                </div>
+
+                <h4 style="margin: 30px 0 20px 0; color: #667eea;">✅ Clôture d'un ticket</h4>
+                
+                <div class="checklist-item" onclick="toggleCheckbox(this)">
+                    <div class="checkbox"></div>
+                    <span><strong>Vérifier que tous les critères d'acceptation sont remplis</strong> - Definition of Done</span>
+                </div>
+                
+                <div class="checklist-item" onclick="toggleCheckbox(this)">
+                    <div class="checkbox"></div>
+                    <span><strong>Tests effectués et passés</strong> - Qualité assurée</span>
+                </div>
+                
+                <div class="checklist-item" onclick="toggleCheckbox(this)">
+                    <div class="checkbox"></div>
+                    <span><strong>Code reviewé si applicable</strong> - Validation par les pairs</span>
+                </div>
+                
+                <div class="checklist-item" onclick="toggleCheckbox(this)">
+                    <div class="checkbox"></div>
+                    <span><strong>Documentation mise à jour si nécessaire</strong> - Traçabilité</span>
+                </div>
+                
+                <div class="checklist-item" onclick="toggleCheckbox(this)">
+                    <div class="checkbox"></div>
+                    <span><strong>Déployé en production ou merged dans la branche principale</strong> - Livraison</span>
+                </div>
+            </div>
+
+            <h3>🎯 Points clés à retenir</h3>
+
+            <div class="ticket-cards">
+                <div class="ticket-card ticket-feature">
+                    <div class="ticket-icon">🎫</div>
+                    <h3 style="color: #3b82f6;">Ticket = Unité de travail</h3>
+                    <p>Chaque ticket représente une tâche précise et actionnable dans votre projet</p>
+                </div>
+
+                <div class="ticket-card ticket-task">
+                    <div class="ticket-icon">🔄</div>
+                    <h3 style="color: #f59e0b;">Workflow visuel</h3>
+                    <p>Trello/Notion permettent de voir d'un coup d'œil l'avancement du projet</p>
+                </div>
+
+                <div class="ticket-card ticket-improvement">
+                    <div class="ticket-icon">📝</div>
+                    <h3 style="color: #10b981;">Rédaction claire</h3>
+                    <p>Un bon ticket est SMART : Spécifique, Mesurable, Actionnable, Réaliste, Temporisé</p>
+                </div>
+
+                <div class="ticket-card ticket-bug">
+                    <div class="ticket-icon">🏆</div>
+                    <h3 style="color: #ef4444;">Scrum + Tickets</h3>
+                    <p>Les tickets sont la traduction concrète de votre backlog dans un outil de gestion</p>
+                </div>
+            </div>
+
+            <h3>📚 Ressources pour aller plus loin</h3>
+
+            <div class="best-practices">
+                <ul>
+                    <li><strong>Trello</strong> : <a href="https://trello.com" target="_blank" style="color: #667eea;">trello.com</a> - Créez votre compte gratuit</li>
+                    <li><strong>Notion</strong> : <a href="https://notion.so" target="_blank" style="color: #667eea;">notion.so</a> - Version étudiante gratuite</li>
+                    <li><strong>GLPI</strong> : <a href="https://glpi-project.org" target="_blank" style="color: #667eea;">glpi-project.org</a> - Documentation officielle</li>
+                    <li><strong>Atlassian (Jira)</strong> : Leader du marché en entreprise (plus complexe)</li>
+                    <li><strong>Guide Scrum</strong> : <a href="https://scrumguides.org" target="_blank" style="color: #667eea;">scrumguides.org</a> - Guide officiel</li>
+                </ul>
+            </div>
+
+            <h3>🚀 Prochaines étapes</h3>
+
+            <div class="workflow-steps">
+                <div class="workflow-step">
+                    <h4>1️⃣ Pratiquer</h4>
+                    <p>Créer un tableau sur Trello ou Notion</p>
+                </div>
+                <div class="workflow-step">
+                    <h4>2️⃣ Exercice</h4>
+                    <p>Réaliser l'exercice pratique guidé</p>
+                </div>
+                <div class="workflow-step">
+                    <h4>3️⃣ Projet réel</h4>
+                    <p>Appliquer sur vos projets BTS</p>
+                </div>
+                <div class="workflow-step">
+                    <h4>4️⃣ Améliorer</h4>
+                    <p>Adapter le système à votre équipe</p>
+                </div>
+            </div>
+
+            <div class="alert alert-info">
+                <div class="alert-icon">💼</div>
+                <div>
+                    <strong>En entreprise :</strong> La gestion de tickets est une compétence universelle. Que vous alliez en développement, support IT, gestion de projet, ou DevOps, vous utiliserez ces outils quotidiennement. Maîtrisez-les maintenant !
+                </div>
+            </div>
+
+            <div class="alert alert-success">
+                <div class="alert-icon">✅</div>
+                <div>
+                    <strong>Mission accomplie !</strong> Vous avez terminé le cours sur la gestion de tickets. Vous êtes maintenant prêt à organiser efficacement vos projets et à collaborer professionnellement avec votre équipe.
+                    <br><br>
+                    <strong>N'oubliez pas :</strong> La pratique régulière est la clé. Commencez dès aujourd'hui à utiliser ces outils sur vos projets !
+                </div>
+            </div>
+        </div>
+
+        <!-- Footer -->
+        <footer class="mt-8">
+            <div class="flex flex-wrap justify-center gap-3 py-6" style="border-top: 2px solid #e5e7eb;">
+                <a href="#intro" style="background: #667eea; color: white; padding: 12px 24px; border-radius: 8px; text-decoration: none; font-weight: 600;">⬆️ Retour au début</a>
+                <button onclick="window.print()" style="background: #10b981; color: white; padding: 12px 24px; border-radius: 8px; border: none; cursor: pointer; font-weight: 600;">🖨️ Imprimer le cours</button>
+            </div>
+            <div style="text-align: center; color: #666; padding: 20px; font-size: 0.9em;">
+                <p>📚 Cours BTS SIO SLAM - Gestion de Tickets</p>
+                <p>💡 Pratiquez régulièrement pour maîtriser ces compétences essentielles !</p>
+            </div>
+        </footer>
+    </main>
+
+    <!-- JavaScript -->
+    <script>
+        // Données des quiz avec explications
+        const quizData = {
+            1: [
+                { 
+                    explanation: "Un ticket est une unité de travail dans un projet - il représente quelque chose à faire (bug, feature, tâche, etc.)."
+                },
+                { 
+                    explanation: "En général, un bug (quelque chose qui ne fonctionne pas) est plus urgent qu'une amélioration d'une fonctionnalité existante."
+                },
+                { 
+                    explanation: "Dans Trello, chaque ticket est représenté par une 'carte' (card) que l'on peut déplacer entre les listes."
+                },
+                { 
+                    explanation: "GLPI est un outil professionnel spécialisé pour la gestion des incidents et du support IT en entreprise."
+                },
+                { 
+                    explanation: "Bonne pratique : 1 ticket = 1 responsable unique. Cela évite la confusion et garantit la responsabilité."
+                }
+            ],
+            2: [
+                { 
+                    explanation: "Trello est parfait pour la simplicité et le visuel (Kanban), tandis que Notion offre plus de puissance avec ses bases de données et vues multiples."
+                },
+                { 
+                    explanation: "Le Sprint Backlog contient uniquement les tickets sélectionnés pour le sprint en cours, pas tous les tickets du projet."
+                },
+                { 
+                    explanation: "Dans GLPI, un Incident est un symptôme (quelque chose ne marche pas), tandis qu'un Problème est la cause racine de plusieurs incidents."
+                },
+                { 
+                    explanation: "La limite WIP (Work In Progress) recommandée est de 2-3 tickets maximum en cours par personne pour éviter le multitasking inefficace."
+                },
+                { 
+                    explanation: "La vélocité mesure le nombre de story points complétés par sprint, permettant de prédire la capacité de l'équipe."
+                }
+            ],
+            3: [
+                { 
+                    explanation: "Un bon titre doit être clair et descriptif - on doit comprendre l'essentiel du ticket sans avoir à l'ouvrir."
+                },
+                { 
+                    explanation: "Pour un bug, les steps to reproduce (étapes pour reproduire) sont essentiels pour que le développeur puisse recréer le problème."
+                },
+                { 
+                    explanation: "SMART signifie : Spécifique, Mesurable, Actionnable, Réaliste, Temporisé - critères d'un bon ticket."
+                },
+                { 
+                    explanation: "Règle fondamentale : 1 ticket = 1 problème ou fonctionnalité. Sinon, créez plusieurs tickets et liez-les si nécessaire."
+                },
+                { 
+                    explanation: "La Definition of Done définit les critères précis pour considérer un ticket complètement terminé (tests, review, déployement, etc.)."
+                }
+            ]
+        };
+
+        let quizScores = {};
+
+        // Fonction pour mélanger un tableau (Fisher-Yates shuffle)
+        function shuffleArray(array) {
+            const newArray = [...array];
+            for (let i = newArray.length - 1; i > 0; i--) {
+                const j = Math.floor(Math.random() * (i + 1));
+                [newArray[i], newArray[j]] = [newArray[j], newArray[i]];
+            }
+            return newArray;
+        }
+
+        // Fonction pour randomiser les positions des réponses dans tous les quiz
+        function randomizeQuizAnswers() {
+            document.querySelectorAll('[id^="quiz"]').forEach(quizElement => {
+                const quizId = quizElement.id.replace('quiz', '');
+
+                quizElement.querySelectorAll('.quiz-question').forEach((questionElement, questionIndex) => {
+                    const optionsContainer = questionElement.querySelector('.quiz-options');
+                    if (!optionsContainer) return;
+
+                    const buttons = Array.from(optionsContainer.querySelectorAll('.quiz-option'));
+                    if (buttons.length === 0) return;
+
+                    const buttonData = buttons.map(button => {
+                        const isCorrect = button.getAttribute('data-correct') === 'true';
+                        const text = button.textContent.trim();
+                        
+                        // Extraire la lettre et le contenu
+                        let letter = '';
+                        let content = text;
+                        if (text.match(/^[A-C]\)/)) {
+                            letter = text.substring(0, 2);
+                            content = text.substring(3);
+                        }
+
+                        return {
+                            isCorrect: isCorrect,
+                            content: content,
+                            originalLetter: letter
+                        };
+                    });
+
+                    // Mélanger les données
+                    const shuffledData = shuffleArray(buttonData);
+
+                    // Remettre les boutons dans l'ordre mélangé avec nouvelles lettres
+                    const letters = ['A)', 'B)', 'C)'];
+                    optionsContainer.innerHTML = '';
+
+                    shuffledData.forEach((data, index) => {
+                        const newButton = document.createElement('button');
+                        newButton.className = 'quiz-option';
+                        newButton.setAttribute('data-correct', data.isCorrect);
+                        
+                        // Si c'était un vrai/faux, pas de lettre
+                        if (data.originalLetter) {
+                            newButton.textContent = `${letters[index]} ${data.content}`;
+                        } else {
+                            newButton.textContent = data.content;
+                        }
+                        
+                        newButton.onclick = function() {
+                            selectAnswer(parseInt(quizId), questionIndex + 1, data.isCorrect, this);
+                        };
+                        optionsContainer.appendChild(newButton);
+                    });
+                });
+            });
+        }
+
+        function toggleIntro(introId) {
+            const content = document.getElementById(`intro${introId}`);
+            const arrow = content.previousElementSibling.querySelector('.intro-arrow');
+
+            if (content.classList.contains('open')) {
+                content.classList.remove('open');
+                arrow.classList.remove('open');
+            } else {
+                content.classList.add('open');
+                arrow.classList.add('open');
+            }
+        }
+
+        function toggleQuiz(quizId) {
+            const content = document.getElementById(`quiz${quizId}`);
+            const arrow = content.previousElementSibling.querySelector('.quiz-arrow');
+            
+            if (content.classList.contains('open')) {
+                content.classList.remove('open');
+                arrow.classList.remove('open');
+            } else {
+                content.classList.add('open');
+                arrow.classList.add('open');
+            }
+        }
+
+        function selectAnswer(quizId, questionId, isCorrect, buttonElement) {
+            const question = buttonElement.closest('.quiz-question');
+            const options = question.querySelectorAll('.quiz-option');
+            const feedback = question.querySelector('.quiz-feedback');
+            const feedbackText = feedback.querySelector('.feedback-text');
+            
+            // Désactiver tous les boutons
+            options.forEach(option => {
+                option.style.pointerEvents = 'none';
+                const optionIsCorrect = option.getAttribute('data-correct') === 'true';
+                if (optionIsCorrect) {
+                    option.classList.add('correct');
+                } else if (option === buttonElement && !isCorrect) {
+                    option.classList.add('incorrect');
+                }
+            });
+
+            // Afficher le feedback
+            const data = quizData[quizId][questionId - 1];
+            feedbackText.innerHTML = `<strong>${isCorrect ? '✅ Correct !' : '❌ Incorrect.'}</strong><br>${data.explanation}`;
+            feedback.classList.add('show');
+            feedback.classList.add(isCorrect ? 'feedback-correct' : 'feedback-incorrect');
+
+            // Comptabiliser le score
+            if (!quizScores[quizId]) {
+                quizScores[quizId] = { correct: 0, total: 0 };
+            }
+            
+            if (isCorrect) {
+                quizScores[quizId].correct++;
+            }
+            quizScores[quizId].total++;
+
+            // Afficher le score si toutes les questions sont répondues
+            if (quizScores[quizId].total === 5) {
+                setTimeout(() => showQuizScore(quizId), 1000);
+            }
+        }
+
+        function showQuizScore(quizId) {
+            const score = quizScores[quizId];
+            const scoreElement = document.querySelector(`#quiz${quizId} .quiz-score`);
+            const scoreText = scoreElement.querySelector('.score-text');
+            const percentage = Math.round((score.correct / score.total) * 100);
+            
+            let message = '';
+            let emoji = '';
+            
+            if (percentage >= 80) {
+                emoji = '🏆';
+                message = 'Excellent ! Vous maîtrisez parfaitement les concepts de gestion de tickets.';
+            } else if (percentage >= 60) {
+                emoji = '👍';
+                message = 'Bon travail ! Relisez les sections où vous avez eu des difficultés.';
+            } else {
+                emoji = '📚';
+                message = 'Il faut réviser ce chapitre. Relisez attentivement le cours.';
+            }
+            
+            scoreText.innerHTML = `${emoji} Score : ${score.correct}/${score.total} (${percentage}%)<br><br>${message}`;
+            scoreElement.classList.add('show');
+        }
+
+        function toggleCheckbox(item) {
+            const checkbox = item.querySelector('.checkbox');
+            checkbox.classList.toggle('checked');
+            
+            if (checkbox.classList.contains('checked')) {
+                item.style.transform = 'translateX(10px)';
+                setTimeout(() => {
+                    item.style.transform = 'translateX(0)';
+                }, 200);
+            }
+        }
+
+        function smoothScroll() {
+            const links = document.querySelectorAll('.nav-links a');
+            links.forEach(link => {
+                link.addEventListener('click', function(e) {
+                    e.preventDefault();
+                    const target = document.querySelector(this.getAttribute('href'));
+                    const navHeight = document.querySelector('.nav-fixed').offsetHeight;
+                    const targetPosition = target.offsetTop - navHeight - 20;
+                    
+                    window.scrollTo({
+                        top: targetPosition,
+                        behavior: 'smooth'
+                    });
+                });
+            });
+        }
+
+        function updateActiveNav() {
+            const sections = document.querySelectorAll('.section, #intro');
+            const navLinks = document.querySelectorAll('.nav-links a');
+            const navHeight = document.querySelector('.nav-fixed').offsetHeight;
+
+            function highlightNavigation() {
+                let current = '';
+                const scrollPosition = window.pageYOffset + navHeight + 50;
+
+                sections.forEach(section => {
+                    const sectionTop = section.offsetTop;
+                    const sectionBottom = sectionTop + section.offsetHeight;
+
+                    if (scrollPosition >= sectionTop && scrollPosition < sectionBottom) {
+                        current = section.getAttribute('id');
+                    }
+                });
+
+                if (window.pageYOffset < 100) {
+                    current = 'intro';
+                }
+
+                navLinks.forEach(link => {
+                    link.classList.remove('active');
+                    const href = link.getAttribute('href');
+                    if (href === `#${current}`) {
+                        link.classList.add('active');
+                    }
+                });
+            }
+
+            let scrollTimeout;
+            window.addEventListener('scroll', () => {
+                if (scrollTimeout) {
+                    cancelAnimationFrame(scrollTimeout);
+                }
+                scrollTimeout = requestAnimationFrame(highlightNavigation);
+            });
+
+            highlightNavigation();
+        }
+
+        // Initialisation au chargement de la page
+        document.addEventListener('DOMContentLoaded', function() {
+            // Randomiser les réponses des quiz
+            randomizeQuizAnswers();
+            
+            // Activer le smooth scroll
+            smoothScroll();
+            
+            // Activer la navigation active
+            updateActiveNav();
+            
+            // Message de confirmation
+            setTimeout(() => {
+                console.log('🎫 Cours Gestion de Tickets chargé avec succès !');
+                console.log('🎲 Les réponses des quiz ont été randomisées.');
+            }, 1000);
+        });
+    </script>
+</body>
+</html>
